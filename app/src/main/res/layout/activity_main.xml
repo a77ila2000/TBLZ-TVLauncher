@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingStart="40dp"
+    android:paddingEnd="40dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="24dp">
+
+    <!-- Top Status / Header Bar -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/ivLogo"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_tv"
+            app:tint="@color/primary"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Title + Subtitle Container -->
+        <LinearLayout
+            android:id="@+id/titleContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:orientation="horizontal"
+            android:gravity="bottom"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivLogo">
+
+            <TextView
+                android:id="@+id/tvHeaderTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TBLZ TV Launcher"
+                android:textColor="@color/text_white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvHeaderSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginBottom="1dp"
+                android:text="(The Bride Lin Zhaoming)"
+                android:textColor="@color/primary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Settings Button -->
+        <FrameLayout
+            android:id="@+id/btnSettings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_app_card"
+            android:clickable="true"
+            android:contentDescription="@string/launcher_settings"
+            android:focusable="true"
+            android:nextFocusDown="@id/rvLiveChannels"
+            android:nextFocusLeft="@id/tabFavorites"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_settings"
+                app:tint="@color/text_white" />
+        </FrameLayout>
+
+        <!-- Current Clock -->
+        <TextView
+            android:id="@+id/tvClock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:textColor="@color/text_white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="14:30"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnSettings" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- SECTION 1: LIVE TV -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/sectionLiveTv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/headerBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvLiveSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/section_live_tv"
+            android:textColor="@color/text_white"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/tabLayout"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Tabs: Favorites / TVING / Wavve / All Channels -->
+        <LinearLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="12dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tvLiveSectionTitle"
+            app:layout_constraintEnd_toStartOf="@id/btnBrowseAll">
+
+            <TextView
+                android:id="@+id/tabFavorites"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_tab_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:nextFocusUp="@id/btnSettings"
+                android:nextFocusDown="@id/rvLiveChannels"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="@string/tab_favorites"
+                android:textColor="@color/color_tab_text"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tabTving"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_tab_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:nextFocusUp="@id/btnSettings"
+                android:nextFocusDown="@id/rvLiveChannels"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="@string/tab_tving"
+                android:textColor="@color/color_tab_text"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tabWavve"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_tab_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:nextFocusUp="@id/btnSettings"
+                android:nextFocusDown="@id/rvLiveChannels"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="@string/tab_wavve"
+                android:textColor="@color/color_tab_text"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tabAll"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_tab_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:nextFocusUp="@id/btnSettings"
+                android:nextFocusDown="@id/rvLiveChannels"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="@string/tab_all_channels"
+                android:textColor="@color/color_tab_text"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Channels Loading Bar -->
+        <ProgressBar
+            android:id="@+id/pbChannelsLoading"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="12dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/primary"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/tabLayout"
+            app:layout_constraintBottom_toBottomOf="@id/tabLayout"
+            app:layout_constraintStart_toEndOf="@id/tabLayout" />
+
+        <!-- [ ▦ 모아보기 ] Button (Right Aligned) -->
+        <Button
+            android:id="@+id/btnBrowseAll"
+            android:layout_width="wrap_content"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_btn_primary"
+            android:clickable="true"
+            android:focusable="true"
+            android:nextFocusUp="@id/btnSettings"
+            android:nextFocusDown="@id/rvLiveChannels"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:text="▦ 모아보기"
+            android:textColor="@color/color_btn_text"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            tools:ignore="MissingConstraints">
+
+            <!--
+                btnSettings is the first focusable view in traversal order, so without an
+                explicit starting point the system parks initial focus on it whenever the
+                channel row is still empty. Home focus must never start on settings, and
+                this button is the one that is always on screen.
+            -->
+            <requestFocus />
+        </Button>
+
+        <!-- Live Channels Horizontal Recycler -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvLiveChannels"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:focusable="true"
+            android:nextFocusUp="@id/tabFavorites"
+            android:nextFocusDown="@id/rvApps"
+            android:paddingTop="8dp"
+            android:paddingBottom="12dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintTop_toBottomOf="@id/tabLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Empty Text -->
+        <TextView
+            android:id="@+id/tvEmptyChannels"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:textColor="@color/text_dim"
+            android:textSize="15sp"
+            android:visibility="gone"
+            tools:text="등록된 즐겨찾기 채널이 없습니다."
+            app:layout_constraintTop_toBottomOf="@id/tabLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- SECTION 2: APPS -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/sectionApps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/sectionLiveTv"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvAppsSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/section_apps"
+            android:textColor="@color/text_white"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Apps Horizontal Recycler -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvApps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="12dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintTop_toBottomOf="@id/tvAppsSectionTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Network Validation / Boot Splash Loading Overlay -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/networkLoadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background_dark"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ProgressBar
+            android:id="@+id/splashProgress"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/primary"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvSplashStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/connecting_network"
+            android:textColor="@color/text_white"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/splashProgress"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,19 @@
+# Gradle / Kotlin
+.gradle/
+.kotlin/
+build/
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Build outputs and signing material never belong in the repo
+*.apk
+*.aab
+*.jks
+*.keystore
