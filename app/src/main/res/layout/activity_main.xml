@@ -49,7 +49,7 @@
                 android:id="@+id/tvHeaderTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TBLZ TV Launcher"
+                android:text="TBLZ TV"
                 android:textColor="@color/text_white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -61,6 +61,7 @@
                 android:layout_marginStart="6dp"
                 android:layout_marginBottom="1dp"
                 android:text="(The Bride Lin Zhaoming)"
+                android:visibility="gone"
                 android:textColor="@color/primary"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -68,8 +69,8 @@
         <!-- Settings Button -->
         <FrameLayout
             android:id="@+id/btnSettings"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:background="@drawable/bg_app_card"
             android:clickable="true"
             android:contentDescription="@string/launcher_settings"
@@ -91,6 +92,7 @@
         <!-- Current Clock -->
         <TextView
             android:id="@+id/tvClock"
+            android:fontFeatureSettings="tnum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
@@ -109,7 +111,7 @@
         android:id="@+id/sectionLiveTv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:clipChildren="false"
         android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/headerBar"
@@ -145,7 +147,7 @@
             <TextView
                 android:id="@+id/tabFavorites"
                 android:layout_width="wrap_content"
-                android:layout_height="42dp"
+                android:layout_height="44dp"
                 android:background="@drawable/bg_tab_button"
                 android:clickable="true"
                 android:focusable="true"
@@ -153,8 +155,8 @@
                 android:nextFocusDown="@id/rvLiveChannels"
                 android:gravity="center"
                 android:includeFontPadding="false"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:text="@string/tab_favorites"
                 android:textColor="@color/color_tab_text"
                 android:textSize="13sp"
@@ -163,7 +165,7 @@
             <TextView
                 android:id="@+id/tabTving"
                 android:layout_width="wrap_content"
-                android:layout_height="42dp"
+                android:layout_height="44dp"
                 android:layout_marginStart="10dp"
                 android:background="@drawable/bg_tab_button"
                 android:clickable="true"
@@ -172,8 +174,8 @@
                 android:nextFocusDown="@id/rvLiveChannels"
                 android:gravity="center"
                 android:includeFontPadding="false"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:text="@string/tab_tving"
                 android:textColor="@color/color_tab_text"
                 android:textSize="13sp"
@@ -182,7 +184,7 @@
             <TextView
                 android:id="@+id/tabWavve"
                 android:layout_width="wrap_content"
-                android:layout_height="42dp"
+                android:layout_height="44dp"
                 android:layout_marginStart="10dp"
                 android:background="@drawable/bg_tab_button"
                 android:clickable="true"
@@ -191,8 +193,8 @@
                 android:nextFocusDown="@id/rvLiveChannels"
                 android:gravity="center"
                 android:includeFontPadding="false"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:text="@string/tab_wavve"
                 android:textColor="@color/color_tab_text"
                 android:textSize="13sp"
@@ -201,7 +203,7 @@
             <TextView
                 android:id="@+id/tabAll"
                 android:layout_width="wrap_content"
-                android:layout_height="42dp"
+                android:layout_height="44dp"
                 android:layout_marginStart="10dp"
                 android:background="@drawable/bg_tab_button"
                 android:clickable="true"
@@ -210,8 +212,8 @@
                 android:nextFocusDown="@id/rvLiveChannels"
                 android:gravity="center"
                 android:includeFontPadding="false"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:text="@string/tab_all_channels"
                 android:textColor="@color/color_tab_text"
                 android:textSize="13sp"
@@ -236,7 +238,7 @@
         <Button
             android:id="@+id/btnBrowseAll"
             android:layout_width="wrap_content"
-            android:layout_height="42dp"
+            android:layout_height="44dp"
             android:background="@drawable/bg_btn_primary"
             android:clickable="true"
             android:focusable="true"
@@ -244,11 +246,12 @@
             android:nextFocusDown="@id/rvLiveChannels"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
-            android:text="▦ 모아보기"
+            android:text="모아보기"
             android:textColor="@color/color_btn_text"
             android:textSize="13sp"
             android:textStyle="bold"
-            tools:ignore="MissingConstraints">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <!--
                 btnSettings is the first focusable view in traversal order, so without an
@@ -260,7 +263,7 @@
         </Button>
 
         <!-- Live Channels Horizontal Recycler -->
-        <androidx.recyclerview.widget.RecyclerView
+        <com.tblz.tvlauncher.ui.LoopingChannelRow
             android:id="@+id/rvLiveChannels"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -318,6 +321,18 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
+        <TextView
+            android:id="@+id/tvAppsEditHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/shortcut_edit_hint"
+            android:textSize="13sp"
+            android:textColor="@color/primary"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/tvAppsSectionTitle"
+            app:layout_constraintBottom_toBottomOf="@id/tvAppsSectionTitle"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <!-- Apps Horizontal Recycler -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvApps"
@@ -327,7 +342,7 @@
             android:clipChildren="false"
             android:clipToPadding="false"
             android:orientation="horizontal"
-            android:paddingTop="8dp"
+            android:paddingTop="0dp"
             android:paddingBottom="12dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintTop_toBottomOf="@id/tvAppsSectionTitle"

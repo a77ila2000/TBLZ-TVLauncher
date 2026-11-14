@@ -43,11 +43,7 @@ class LivePlayerActivity : AppCompatActivity(), Player.Listener {
     companion object {
         private const val TAG = "LivePlayerActivity"
         const val EXTRA_CHANNEL_ID = "extra_channel_id"
-        /**
-         * Which group the channel was picked from. Zapping stays inside it, because
-         * entering from a category means the user wants that category's channels --
-         * not a walk through all 361. Empty falls back to the full list.
-         */
+        /** Home playback uses FAVORITES; the browse dialog uses ALL. */
         const val EXTRA_CATEGORY_ID = "extra_category_id"
         private const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
@@ -68,9 +64,7 @@ class LivePlayerActivity : AppCompatActivity(), Player.Listener {
     private lateinit var binding: ActivityLivePlayerBinding
     private var player: ExoPlayer? = null
 
-    private var channelList: List<ChannelData> = emptyList()
     private var currentCategoryId: String = ""
-    private var currentIndex: Int = 0
     private var currentChannel: ChannelData? = null
 
     private val osdHandler = Handler(Looper.getMainLooper())
@@ -116,8 +110,9 @@ class LivePlayerActivity : AppCompatActivity(), Player.Listener {
             isColdBootStartup = false
 
             initChannels(targetChannelId, categoryId)
-            if (channelList.isNotEmpty()) {
-                playChannelAtIndex(currentIndex)
+            val channel = currentChannel
+            if (channel != null) {
+                playChannel(channel)
             } else {
                 hideLoading()
                 showError("실시간 채널 목록을 불러오지 못했습니다.\n네트워크 연결 상태를 확인하세요.")
@@ -136,9 +131,7 @@ class LivePlayerActivity : AppCompatActivity(), Player.Listener {
                 LiveTvManager.loadAllChannels()
             }
             initChannels(targetChannelId, categoryId)
-            if (channelList.isNotEmpty()) {
-                playChannelAtIndex(currentIndex)
-            }
+            currentChannel?.let { playChannel(it) }
         }
     }
 
@@ -147,8 +140,8 @@ class LivePlayerActivity : AppCompatActivity(), Player.Listener {
         if (player == null) {
             initPlayer()
         }
-        if (player?.isPlaying != true && channelList.isNotEmpty() && loadJob?.isActive != true) {
-            playChannelAtIndex(currentIndex)
+        if (player?.isPlaying != true && loadJob?.isActive != true) {
+            currentChannel?.let { playChannel(it) }
         }
     }
 
@@ -164,18 +157,10 @@ class LivePlayerActivity : AppCompatActivity(), Player.Listener {
     }
 
     private fun initChannels(targetChannelId: String, categoryId: String) {
-        currentCategoryId = categoryId
-        val scoped = if (categoryId.isNotEmpty()) LiveTvManager.getChannelsByCategory(categoryId) else emptyList()
-        // An emptied category (every favourite un-starred, say) would leave nothing to
-        // zap through, so fall back to everything rather than a dead player.
-        channelList = if (scoped.isNotEmpty()) scoped else LiveTvManager.getAllChannels()
-        Log.i(TAG, "initChannels category=[$categoryId] scoped=${scoped.size} zapList=${channelList.size}")
-
-        if (channelList.isNotEmpty()) {
-            val foundIndex = channelList.indexOfFirst { it.id == targetChannelId }
-            currentIndex = if (foundIndex >= 0) foundIndex else 0
-            currentChannel = channelList[currentIndex]
-        }
+        currentCategoryId = categoryId.ifEmpty { ChannelNavigation.FAVORITES }
+        val scoped = LiveTvManager.getChannelsByCategory(currentCategoryId)
+        currentChannel = ChannelNavigation.initialChannel(LiveTvManager.getAllChannels(), scoped, targetChannelId)
+        Log.i(TAG, "initChannels category=[$currentCategoryId] zapList=${scoped.size}")
     }
 
     private fun initPlayer() {
@@ -186,10 +171,14 @@ class LivePlayerActivity : AppCompatActivity(), Player.Listener {
         binding.playerView.player = player
     }
 
-    private fun playChannelAtIndex(index: Int) {
-        if (channelList.isEmpty()) return
-        currentIndex = (index + channelList.size) % channelList.size
-        val channel = channelList[currentIndex]
+    private fun switchChannel(direction: Int) {
+        // Re-read favorites so additions/removals during playback take effect immediately.
+        val scoped = LiveTvManager.getChannelsByCategory(currentCategoryId)
+        val channel = ChannelNavigation.nextChannel(scoped, currentChannel?.id, direction) ?: return
+        if (channel.id != currentChannel?.id) playChannel(channel)
+    }
+
+    private fun playChannel(channel: ChannelData) {
         currentChannel = channel
 
         ConfigStore.lastChannelId = channel.id
@@ -388,11 +377,11 @@ class LivePlayerActivity : AppCompatActivity(), Player.Listener {
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
             KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_CHANNEL_UP -> {
-                playChannelAtIndex(currentIndex - 1)
+                switchChannel(1)
                 return true
             }
             KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_CHANNEL_DOWN -> {
-                playChannelAtIndex(currentIndex + 1)
+                switchChannel(-1)
                 return true
             }
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {

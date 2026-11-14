@@ -13,6 +13,7 @@ import com.tblz.tvlauncher.databinding.DialogChannelCategoryBinding
 import com.tblz.tvlauncher.engine.LiveTvManager
 import com.tblz.tvlauncher.model.CategoryData
 import com.tblz.tvlauncher.player.LivePlayerActivity
+import com.tblz.tvlauncher.player.ChannelNavigation
 
 class ChannelCategoryDialog(
     context: Context,
@@ -72,8 +73,8 @@ class ChannelCategoryDialog(
             onChannelClick = { channel ->
                 val intent = Intent(context, LivePlayerActivity::class.java).apply {
                     putExtra(LivePlayerActivity.EXTRA_CHANNEL_ID, channel.id)
-                    // Zap inside the category the user was browsing, not the whole list.
-                    putExtra(LivePlayerActivity.EXTRA_CATEGORY_ID, currentCategory?.id ?: "ALL")
+                    // Browsing filters the grid; playback zaps through the full channel list.
+                    putExtra(LivePlayerActivity.EXTRA_CATEGORY_ID, ChannelNavigation.ALL)
                 }
                 context.startActivity(intent)
                 dismiss()

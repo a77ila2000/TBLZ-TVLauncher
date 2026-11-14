@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#00E5FF</color>
-    <color name="primary_dark">#00B0FF</color>
-    <color name="accent">#FF4081</color>
-    <color name="background_dark">#0B0E14</color>
-    <color name="surface_dark">#161B22</color>
-    <color name="card_background">#1F2430</color>
-    <color name="card_focused">#2A3245</color>
-    <color name="focus_stroke">#00E5FF</color>
-    <color name="text_white">#FFFFFF</color>
-    <color name="text_dim">#9E9E9E</color>
+    <color name="primary">#B9C9E0</color>
+    <color name="primary_dark">#859DBD</color>
+    <color name="accent">#E5B77B</color>
+    <color name="background_dark">#11151C</color>
+    <color name="surface_dark">#191F28</color>
+    <color name="card_background">#202630</color>
+    <color name="card_focused">#2B3443</color>
+    <color name="focus_stroke">#DCE6F3</color>
+    <color name="text_white">#F1F4F8</color>
+    <color name="text_dim">#ADB8C8</color>
+    <color name="border_subtle">#36404F</color>
+    <color name="control_background">#293340</color>
+    <color name="control_focused">#DCE5F1</color>
+    <color name="text_on_focus">#101722</color>
+    <color name="danger">#F1A5A5</color>
+    <color name="danger_surface">#462B32</color>
     <color name="badge_wavve">#1155CC</color>
-    <color name="badge_tving">#FF153C</color>
-    <color name="favorite_gold">#FFD700</color>
-    <color name="osd_background">#E610141D</color>
-    <color name="progress_bar_bg">#33FFFFFF</color>
-    <color name="progress_bar_fg">#00E5FF</color>
+    <color name="badge_tving">#CF1835</color>
+    <color name="favorite_gold">#E3BD69</color>
+    <color name="osd_background">#F7191F28</color>
+    <color name="progress_bar_bg">#3B4553</color>
+    <color name="progress_bar_fg">#B9C9E0</color>
 </resources>

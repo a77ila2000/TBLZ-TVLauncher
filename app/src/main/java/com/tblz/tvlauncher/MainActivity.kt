@@ -11,7 +11,6 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -21,6 +20,7 @@ import com.tblz.tvlauncher.engine.ConfigStore
 import com.tblz.tvlauncher.engine.LiveTvManager
 import com.tblz.tvlauncher.engine.NetworkValidator
 import com.tblz.tvlauncher.player.LivePlayerActivity
+import com.tblz.tvlauncher.player.ChannelNavigation
 import com.tblz.tvlauncher.ui.AllAppsDialog
 import com.tblz.tvlauncher.ui.AppItem
 import com.tblz.tvlauncher.ui.AppLauncherAdapter
@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
             onChannelClick = { channel ->
                 val intent = Intent(this, LivePlayerActivity::class.java).apply {
                     putExtra(LivePlayerActivity.EXTRA_CHANNEL_ID, channel.id)
-                    putExtra(LivePlayerActivity.EXTRA_CATEGORY_ID, categoryIdForTab(currentTab))
+                    putExtra(LivePlayerActivity.EXTRA_CATEGORY_ID, ChannelNavigation.FAVORITES)
                 }
                 startActivity(intent)
             },
@@ -143,20 +143,12 @@ class MainActivity : AppCompatActivity() {
             onAppClick = { appItem ->
                 handleAppClick(appItem)
             },
-            onAppLongClick = { appItem ->
-                if (!appItem.isAction) {
-                    AlertDialog.Builder(this)
-                        .setTitle("어플 삭제")
-                        .setMessage("'${appItem.title}' 앱을 홈 화면 바로가기에서 제거할까요?")
-                        .setPositiveButton("삭제") { _, _ ->
-                            ConfigStore.removeUserApp(appItem.id)
-                            Toast.makeText(this, "${appItem.title} 바로가기가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-                            loadAppShortcuts()
-                        }
-                        .setNegativeButton("취소", null)
-                        .show()
-                }
-            }
+            onAppOrderChanged = { ConfigStore.reorderUserApps(it) },
+            onAppRemoved = { appItem ->
+                ConfigStore.removeUserApp(appItem.id)
+                Toast.makeText(this, "${appItem.title} 바로가기가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            },
+            onEditModeChanged = { binding.tvAppsEditHint.isVisible = it }
         )
 
         binding.rvApps.apply {
@@ -184,14 +176,6 @@ class MainActivity : AppCompatActivity() {
 
         selectTab(TAB_FAVORITES)
         loadAppShortcuts()
-    }
-
-    /** The zapping group a channel opened from this tab belongs to. */
-    private fun categoryIdForTab(tab: Int): String = when (tab) {
-        TAB_TVING -> "ALL_TVING"
-        TAB_WAVVE -> "ALL_WAVVE"
-        TAB_ALL -> "ALL"
-        else -> "FAVORITES"
     }
 
     private fun launchSystemSettings() {
@@ -267,7 +251,7 @@ class MainActivity : AppCompatActivity() {
             isLoadingChannels = false
             binding.pbChannelsLoading.isVisible = false
             refreshChannelsView()
-            focusFirstChannel()
+            if (!binding.rvLiveChannels.hasFocus() && !binding.rvApps.hasFocus()) focusFirstChannel()
         }
     }
 
@@ -282,6 +266,7 @@ class MainActivity : AppCompatActivity() {
             focusHandler.removeCallbacksAndMessages(null)
         }
         binding.rvLiveChannels.post {
+            if (appAdapter.isEditing) return@post
             firstChannelCard()?.let {
                 it.requestFocus()
                 return@post
@@ -314,7 +299,7 @@ class MainActivity : AppCompatActivity() {
 
         val channelsToDisplay = currentTabChannels()
 
-        channelAdapter.submitList(channelsToDisplay)
+        channelAdapter.refreshData(channelsToDisplay)
 
         if (channelsToDisplay.isEmpty()) {
             // While a fetch is still running the row is empty because we have not got the
@@ -443,6 +428,7 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
+        if (appAdapter.isEditing) appAdapter.cancelEditing()
         // Do nothing on home screen so launcher never closes or finishes
     }
 
@@ -469,6 +455,7 @@ class MainActivity : AppCompatActivity() {
         // dialog is open re-delivers the launcher intent here rather than dismissing the dialog,
         // so close any open dialog to return to a clean home.
         dismissLauncherDialogs()
+        appAdapter.cancelEditing()
     }
 
     override fun onResume() {
@@ -493,6 +480,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        appAdapter.cancelEditing()
         programRefreshHandler.removeCallbacks(programRefreshRunnable)
     }
 

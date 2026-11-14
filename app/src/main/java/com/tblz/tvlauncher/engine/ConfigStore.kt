@@ -175,6 +175,11 @@ object ConfigStore {
         prefs.edit().putString(KEY_USER_APPS, apps.joinToString(",")).apply()
     }
 
+    fun reorderUserApps(visibleOrder: List<String>) {
+        val apps = reorderedUserApps(getUserApps(), visibleOrder)
+        prefs.edit().putString(KEY_USER_APPS, apps.joinToString(",")).apply()
+    }
+
     fun clearAll() {
         prefs.edit().clear().apply()
     }

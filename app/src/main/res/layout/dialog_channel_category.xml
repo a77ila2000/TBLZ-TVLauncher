@@ -12,7 +12,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="실시간 TV 카테고리 모아보기"
+        android:text="채널 모아보기"
         android:textColor="@color/text_white"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -25,8 +25,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:text="💡 OK 단타: 즉시 재생 | OK 길게 누르기: 즐겨찾기(★) 토글"
-        android:textColor="@color/primary"
+        android:text="확인: 재생 · 길게 누르기: 즐겨찾기"
+        android:textColor="@color/text_dim"
         android:textSize="13sp"
         app:layout_constraintTop_toTopOf="@id/tvTitle"
         app:layout_constraintBottom_toBottomOf="@id/tvTitle"
@@ -36,7 +36,7 @@
     <Button
         android:id="@+id/btnClose"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="44dp"
         android:background="@drawable/bg_btn_neutral"
         android:clickable="true"
         android:focusable="true"
@@ -58,7 +58,7 @@
         android:clipToPadding="false"
         android:paddingEnd="8dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintTop_toBottomOf="@id/btnClose"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -67,7 +67,7 @@
         android:id="@+id/divider"
         android:layout_width="1dp"
         android:layout_height="0dp"
-        android:background="#33FFFFFF"
+        android:background="@color/border_subtle"
         app:layout_constraintTop_toTopOf="@id/rvCategories"
         app:layout_constraintBottom_toBottomOf="@id/rvCategories"
         app:layout_constraintStart_toEndOf="@id/rvCategories" />

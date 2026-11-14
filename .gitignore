@@ -17,3 +17,5 @@ captures/
 *.aab
 *.jks
 *.keystore
+TBLZ-signing-keys-*/
+TBLZ-signing-keys-*.zip
