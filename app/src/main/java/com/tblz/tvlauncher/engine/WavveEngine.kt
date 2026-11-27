@@ -20,6 +20,8 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 object WavveEngine {
     private const val TAG = "WavveEngine"
@@ -33,6 +35,8 @@ object WavveEngine {
         .build()
 
     private val guid = UUID.randomUUID().toString().replace("-", "")
+    private val authRefreshMutex = Mutex()
+    private data class StreamAttempt(val result: PlaybackResult, val sessionExpired: Boolean = false)
 
     suspend fun login(id: String, pw: String): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -62,7 +66,7 @@ object WavveEngine {
                 Log.d(TAG, "Wavve login success! Credential saved.")
                 return@withContext true
             } else {
-                Log.e(TAG, "Wavve login response error: $body")
+                Log.e(TAG, "Wavve login response did not include a credential.")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Wavve login exception: ${e.message}")
@@ -184,11 +188,48 @@ object WavveEngine {
 
     suspend fun getStreamPlaybackInfo(channel: ChannelData): PlaybackResult = withContext(Dispatchers.IO) {
         var authKey = ConfigStore.wavveAuthKey
-        if (authKey.isEmpty() && ConfigStore.wavveId.isNotEmpty() && ConfigStore.wavvePw.isNotEmpty()) {
-            login(ConfigStore.wavveId, ConfigStore.wavvePw)
-            authKey = ConfigStore.wavveAuthKey
+        var loggedInBeforeRequest = false
+        if (authKey.isEmpty()) {
+            authKey = refreshSession(authKey)
+                ?: return@withContext PlaybackResult.AuthRequired(
+                    "Wavve 로그인이 필요합니다.\n런처 [설정]에서 계정으로 로그인해 주세요."
+                )
+            loggedInBeforeRequest = true
         }
 
+        val firstAttempt = requestStream(channel, authKey)
+        if (loggedInBeforeRequest || !firstAttempt.sessionExpired) {
+            return@withContext firstAttempt.result
+        }
+
+        val renewedAuthKey = refreshSession(authKey) ?: return@withContext firstAttempt.result
+        requestStream(channel, renewedAuthKey).result
+    }
+
+    private suspend fun refreshSession(staleAuthKey: String): String? = authRefreshMutex.withLock {
+        val currentAuthKey = ConfigStore.wavveAuthKey
+        if (currentAuthKey.isNotEmpty() && currentAuthKey != staleAuthKey) {
+            return@withLock currentAuthKey
+        }
+
+        val id = ConfigStore.wavveId
+        val pw = ConfigStore.wavvePw
+        if (id.isEmpty() || pw.isEmpty() || !login(id, pw)) return@withLock null
+        ConfigStore.wavveAuthKey.takeIf { it.isNotEmpty() }
+    }
+
+    private fun isSessionExpired(httpCode: Int, resultCode: String, resultMessage: String): Boolean {
+        val error = "$resultCode $resultMessage".lowercase(Locale.ROOT)
+        if (listOf("이용권", "판권", "시청 권한", "가입 상품").any { it in error }) return false
+        if (httpCode == 401 || httpCode == 403) return true
+        return listOf(
+            "unauthorized", "unauthorised", "invalid token", "expired token", "token expired",
+            "invalid credential", "credential expired", "authentication", "session expired",
+            "login required", "로그인", "인증", "토큰", "세션", "만료"
+        ).any { it in error }
+    }
+
+    private suspend fun requestStream(channel: ChannelData, authKey: String): StreamAttempt = withContext(Dispatchers.IO) {
         try {
             val qualityStr = when (channel.qualityType) {
                 0 -> "5000" // 1080p FHD
@@ -216,8 +257,25 @@ object WavveEngine {
             }
 
             val resp = httpClient.newCall(reqBuilder.build()).execute()
-            val body = resp.body?.string() ?: return@withContext PlaybackResult.Error("Wavve 서버 응답이 없습니다.")
-            val json = JsonParser.parseString(body).asJsonObject
+            val body = resp.body?.string()
+            if (body == null) {
+                val expired = isSessionExpired(resp.code, "", "")
+                return@withContext if (expired) {
+                    StreamAttempt(PlaybackResult.AuthRequired("Wavve 로그인이 만료됐습니다.\n저장된 계정으로 자동 갱신하지 못했습니다. 런처 [설정]에서 계정을 확인해 주세요."), true)
+                } else {
+                    StreamAttempt(PlaybackResult.Error("Wavve 서버 응답이 없습니다."))
+                }
+            }
+            val json = try {
+                JsonParser.parseString(body).asJsonObject
+            } catch (_: Exception) {
+                val expired = isSessionExpired(resp.code, "", "")
+                return@withContext if (expired) {
+                    StreamAttempt(PlaybackResult.AuthRequired("Wavve 로그인이 만료됐습니다.\n저장된 계정으로 자동 갱신하지 못했습니다. 런처 [설정]에서 계정을 확인해 주세요."), true)
+                } else {
+                    StreamAttempt(PlaybackResult.Error("Wavve 서버 응답 형식이 올바르지 않습니다.", retryable = false))
+                }
+            }
 
             val streamUrl = when {
                 json.has("playurl") && !json.get("playurl").isJsonNull -> json.get("playurl").asString
@@ -238,26 +296,28 @@ object WavveEngine {
                     else -> "FHD"
                 }
                 Log.d(TAG, "Wavve stream resolved")
-                return@withContext PlaybackResult.Success(
+                return@withContext StreamAttempt(PlaybackResult.Success(
                     PlaybackInfo(
                         url = streamUrl,
                         cookie = awsCookie,
                         resolution = res
                     )
-                )
+                ))
             } else {
                 val errCode = json.get("resultcode")?.asString ?: ""
                 val errMsg = json.get("resultmessage")?.asString ?: ""
                 Log.e(TAG, "Wavve stream error: $errCode - $errMsg")
-                if (authKey.isEmpty()) {
-                    return@withContext PlaybackResult.AuthRequired("Wavve 로그인이 필요합니다.\n런처 [설정] 메뉴에서 Wavve 계정으로 로그인해 주세요.")
+                val expired = isSessionExpired(resp.code, errCode, errMsg)
+                val message = if (expired) {
+                    "Wavve 인증 세션이 만료됐습니다.\n${errMsg.ifBlank { "저장된 계정으로 자동 갱신을 시도합니다." }}"
                 } else {
-                    return@withContext PlaybackResult.AuthRequired("Wavve $errMsg\n런처 [설정]에서 계정 및 이용권을 확인해 주세요.")
+                    "Wavve ${errMsg.ifBlank { "오류 코드: $errCode" }}\n런처 [설정]에서 계정 및 이용권을 확인해 주세요."
                 }
+                return@withContext StreamAttempt(PlaybackResult.AuthRequired(message), expired)
             }
         } catch (e: Exception) {
             Log.e(TAG, "getStreamPlaybackInfo exception: ${e.message}")
-            return@withContext PlaybackResult.Error("Wavve 오류: ${e.message}")
+            return@withContext StreamAttempt(PlaybackResult.Error("Wavve 오류: ${e.message}"))
         }
     }
 

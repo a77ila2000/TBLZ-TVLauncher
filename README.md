@@ -13,7 +13,7 @@
   - 메인 화면에서 재생하면 즐겨찾기 채널만 순환하고, 모아보기에서 재생하면 전체 채널 순서대로 전환합니다.
   - 즐겨찾기가 없어도 선택한 채널은 재생하며, 위·아래로 전체 채널에 넘어가지 않습니다.
 - TVING Non-DRM HLS(Kotlin 복호화)와 Widevine DRM, Wavve 1080p FHD 재생
-- TVING 로그인(TVING 아이디·CJ ONE·네이버·카카오·Apple), 만료된 accessToken 자동 갱신
+- TVING 로그인(TVING 아이디·CJ ONE·네이버·카카오·Apple), TVING accessToken 및 Wavve 실시간 재생 세션 자동 갱신
 - 부팅 시 마지막 채널 자동 재생, 홈 화면 앱 바로가기
   - 앱 바로가기를 길게 누르면 좌우로 이동할 수 있습니다. 확인은 위치 저장, 위쪽 X는 바로가기 삭제, 뒤로는 이동 취소입니다.
 - 네이티브 `.so` 없음 (Android 7.0 / API 24 이상)
@@ -57,6 +57,6 @@
 
 [변경 내역](CHANGELOG.md)
 
-v1.0.26 (versionCode 27). [APK와 SHA-256 다운로드](https://github.com/a77ila2000/TBLZ-TVLauncher/releases/tag/v1.0.26).
+v1.0.27 (versionCode 28). [APK와 SHA-256 다운로드](https://github.com/a77ila2000/TBLZ-TVLauncher/releases/tag/v1.0.27).
 
-홈·모아보기·설정의 색상, 글자 위계, 카드와 버튼 포커스를 정리했습니다. 채널 순환·앱 편집·로그인·재생 로직은 유지했습니다. [디자인 적용 및 검증 기록](docs/design-v1.0.26.md).
+Wavve 실시간 재생에서 인증 세션 만료 시 저장된 계정으로 한 번 갱신하고 재시도합니다. 이용권·판권 오류는 로그인 만료와 구분합니다. [변경 내역](CHANGELOG.md).
